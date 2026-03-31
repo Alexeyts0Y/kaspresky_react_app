@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import WelcomePage from './pages/Welcome';
-import UsersPage from './pages/Users';
-import GroupsPage from './pages/Groups';
+import Welcome from './pages/Welcome';
+import Users from './pages/Users';
+import Groups from './pages/Groups';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<WelcomePage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="groups" element={<GroupsPage />} />
+          <Route index element={<Welcome />} />
+          <Route path="users" element={<Users />} />
+          <Route path="groups" element={<Groups />} />
         </Route>
       </Routes>
     </BrowserRouter>
