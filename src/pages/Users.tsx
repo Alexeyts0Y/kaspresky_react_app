@@ -15,6 +15,10 @@ export default function UsersPage() {
     const debouncedSearch = useDebounce(searchQuery, 300);
     const [sortConfig, setSortConfig] = useState<{key: SortKey, direction: SortDirection} | null>(null);
 
+    const [newUserName, setNewUserName] = useState('');
+    const [newUserEmail, setNewUserEmail] = useState('');
+    const [newUserPosition, setNewUserPosition] = useState('');
+
     useEffect(() => {
         Promise.all([api.getUsers(), api.getGroups()]).then(([usersData, groupsData]) => {
             setUsers(usersData);
@@ -22,6 +26,21 @@ export default function UsersPage() {
             setLoading(false);
             });
     }, []);
+
+    const handleAddUser = async (e: React.SyntheticEvent) => {
+        e.preventDefault();
+        if (!newUserName || !newUserEmail) return;
+        const user = await api.addUser({name: newUserName, email: newUserEmail, position: newUserPosition, groupId: null});
+        setUsers([...users, user]);
+        setNewUserName('');
+        setNewUserEmail('');
+        setNewUserPosition('');
+    };
+
+    const handleDelete = async (id: string) => {
+        await api.deleteUser(id);
+        setUsers(users.filter(u => u.id !== id));
+    };
 
     const handleSort = (key: SortKey) => {
         let direction: SortDirection = 'asc';
@@ -77,6 +96,21 @@ export default function UsersPage() {
                     onChange={e => setSearchQuery(e.target.value)} 
                 />
             </div>
+            <form onSubmit={handleAddUser} className="bg-white p-4 rounded-lg shadow-sm border flex gap-4 items-end">
+                <div>
+                    <label className="block text-sm text-gray-600 mb-1">ФИО</label>
+                    <input required type="text" className="border rounded px-3 py-1.5 w-full" value={newUserName} onChange={e => setNewUserName(e.target.value)} />
+                </div>
+                <div>
+                    <label className="block text-sm text-gray-600 mb-1">Email</label>
+                    <input required type="text" className="border rounded px-3 py-1.5 w-full" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} />
+                </div>
+                <div>
+                    <label className="block text-sm text-gray-600 mb-1">Должность</label>
+                    <input required type="text" className="border rounded px-3 py-1.5 w-full" value={newUserPosition} onChange={e => setNewUserPosition(e.target.value)} />
+                </div>
+                <button type="submit" className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700">Добавить</button>
+            </form>
             <div className="bg-white shadow-sm rounded-lg overflow-hidden border">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -88,6 +122,7 @@ export default function UsersPage() {
                                 </th>
                             ))}
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Отдел</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -100,6 +135,9 @@ export default function UsersPage() {
                                     <span className={`px-2 py-1 inline-flex text-xs font-semibold rounded-full ${user.groupId ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {getGroupName(user.groupId)}
                                     </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">Удалить</button>
                                 </td>
                             </tr>
                         ))}
